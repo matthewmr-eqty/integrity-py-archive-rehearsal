@@ -1,0 +1,103 @@
+# Rehearsal for release.yml's archive_release_docs job. Runs ONLY in a personal fork.
+# Copy to .github/workflows/test-archive-release.yml on the fork's main, with a fake v9.9.0 tag
+# pushed to the fork. The second job's steps match archive_release_docs; only its trigger,
+# `needs` and VERSION differ, and the first job stands in for the release build's reports.
+name: Test archive release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fake_reports:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write four fixture reports under the release build's artifact names
+        run: |
+          mkdir -p r1 r2 r3 r4
+          echo "eqty_sdk-9.9.0-cp38-abi3-manylinux_2_17_x86_64.whl fixture" > r1/auditwheel-show-linux-x86_64.txt
+          echo "eqty_sdk-9.9.0-cp38-abi3-manylinux_2_17_aarch64.whl fixture" > r2/auditwheel-show-linux-aarch64.txt
+          echo "macOS arm64 fixture" > r3/otool-show-macos-arm64.txt
+          echo "macOS x86_64 fixture" > r4/otool-show-macos-x86_64.txt
+      - uses: actions/upload-artifact@v6
+        with: { name: auditwheel-report-ubuntu-latest, path: r1/*.txt }
+      - uses: actions/upload-artifact@v6
+        with: { name: auditwheel-report-ubuntu-24.04-arm, path: r2/*.txt }
+      - uses: actions/upload-artifact@v6
+        with: { name: otool-report-macos-arm64, path: r3/*.txt }
+      - uses: actions/upload-artifact@v6
+        with: { name: otool-report-macos-x86_64, path: r4/*.txt }
+
+  archive_release_docs:
+    needs: fake_reports
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      VERSION: "9.9.0"
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Download x86_64 auditwheel report
+        uses: actions/download-artifact@v7
+        with: { name: auditwheel-report-ubuntu-latest, path: docs/generated }
+
+      - name: Download aarch64 auditwheel report
+        uses: actions/download-artifact@v7
+        with: { name: auditwheel-report-ubuntu-24.04-arm, path: docs/generated }
+
+      - name: Download macOS linkage report
+        uses: actions/download-artifact@v7
+        with: { name: otool-report-macos-arm64, path: docs/generated }
+
+      - name: Download macOS Intel linkage report
+        uses: actions/download-artifact@v7
+        with: { name: otool-report-macos-x86_64, path: docs/generated }
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install the API renderer
+        run: python -m pip install griffe==1.14.0 griffe2md==1.2.5
+
+      - name: Save the release's docs
+        run: scripts/archive_release.sh "$VERSION" | tee "$RUNNER_TEMP/archive.log"
+
+      - name: Open the archive PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # In a fork, gh can pick the parent repo as the PR's base. Pin it to the fork.
+          GH_REPO: ${{ github.repository }}
+        run: |
+          branch="docs/archive-v$VERSION"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # A release that is not the newest is skipped by the script and changes nothing.
+          if [ -z "$(git status --porcelain docs-site docs/generated)" ]; then
+            exit 0
+          fi
+          git switch -C "$branch"
+          git add docs-site/archive docs/generated docs-site/src/content/docs
+          git commit -m "docs: archive the $VERSION docs"
+          git push --force origin "$branch"
+          if gh pr view "$branch" --json state --jq .state 2>/dev/null | grep -q OPEN; then
+            exit 0
+          fi
+          {
+            echo "Saves the $VERSION docs, with the real wheel reports, as the version the site serves once a newer release ships."
+            echo
+            echo "Opened by release.yml, so the docs build check does not run on it: check the Vercel preview."
+            if grep -q '^archive_release: vercel.json' "$RUNNER_TEMP/archive.log"; then
+              echo
+              grep '^archive_release: vercel.json' "$RUNNER_TEMP/archive.log" | sed 's/^archive_release: /- [ ] /'
+            fi
+          } > "$RUNNER_TEMP/body.md"
+          gh pr create --base main --head "$branch" \
+            --title "docs: archive the $VERSION docs" \
+            --body-file "$RUNNER_TEMP/body.md"
