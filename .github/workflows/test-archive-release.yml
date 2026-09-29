@@ -1,0 +1,95 @@
+# Rehearsal for release.yml's archive_release_docs job. Runs ONLY in a personal fork.
+# Copy to .github/workflows/test-archive-release.yml on the fork's main, with fake tags pushed to
+# the fork, and the CI and docs-check stand-ins beside it. The second job runs the same scripts
+# with the same steps as archive_release_docs. It differs in its trigger and `needs`, VERSION from
+# an input, GH_REPO, and no `publish_docs` gate; the first job stands in for the release build.
+name: Test archive release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Fake release to archive; its tag must exist in the fork
+        default: "9.9.0"
+      stale:
+        description: Write another version's reports, to check that the job fails
+        type: boolean
+        default: false
+
+jobs:
+  fake_reports:
+    runs-on: ubuntu-latest
+    env:
+      REPORTED: ${{ inputs.stale && '0.0.0' || inputs.version }}
+    steps:
+      - name: Write four fixture reports under the release build's artifact names
+        run: |
+          mkdir -p r1 r2 r3 r4
+          echo "eqty_sdk-$REPORTED-cp38-abi3-manylinux_2_17_x86_64.whl fixture" > r1/auditwheel-show-linux-x86_64.txt
+          echo "eqty_sdk-$REPORTED-cp38-abi3-manylinux_2_17_aarch64.whl fixture" > r2/auditwheel-show-linux-aarch64.txt
+          echo "macOS arm64 fixture $REPORTED" > r3/otool-show-macos-arm64.txt
+          echo "macOS x86_64 fixture $REPORTED" > r4/otool-show-macos-x86_64.txt
+      - uses: actions/upload-artifact@v6
+        with: { name: auditwheel-report-ubuntu-latest, path: r1/*.txt }
+      - uses: actions/upload-artifact@v6
+        with: { name: auditwheel-report-ubuntu-24.04-arm, path: r2/*.txt }
+      - uses: actions/upload-artifact@v6
+        with: { name: otool-report-macos-arm64, path: r3/*.txt }
+      - uses: actions/upload-artifact@v6
+        with: { name: otool-report-macos-x86_64, path: r4/*.txt }
+
+  archive_release_docs:
+    needs: fake_reports
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      # To start CI and the docs build check on the archive branch: pushes made with
+      # github.token start no workflows.
+      actions: write
+    env:
+      VERSION: ${{ inputs.version }}
+    steps:
+      - name: Checkout main
+        uses: eqtylab-actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Download x86_64 auditwheel report
+        uses: actions/download-artifact@v7
+        with: { name: auditwheel-report-ubuntu-latest, path: docs/generated }
+
+      - name: Download aarch64 auditwheel report
+        uses: actions/download-artifact@v7
+        with: { name: auditwheel-report-ubuntu-24.04-arm, path: docs/generated }
+
+      - name: Download macOS linkage report
+        uses: actions/download-artifact@v7
+        with: { name: otool-report-macos-arm64, path: docs/generated }
+
+      - name: Download macOS Intel linkage report
+        uses: actions/download-artifact@v7
+        with: { name: otool-report-macos-x86_64, path: docs/generated }
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install the API renderer
+        run: python -m pip install griffe==1.14.0 griffe2md==1.2.5
+
+      - name: Save the release's docs
+        # bash, not the default `bash -e`, so pipefail keeps the script's exit status through tee.
+        shell: bash
+        run: scripts/archive_release.sh "$VERSION" | tee "$RUNNER_TEMP/archive.log"
+
+      # Safe to re-run while the report artifacts last (one day); see the script's header.
+      - name: Open the archive PR
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # In a fork, gh can pick the parent repo as the PR's base. Pin it to the fork.
+          GH_REPO: ${{ github.repository }}
+        run: scripts/open_archive_pr.sh "$VERSION" "$RUNNER_TEMP/archive.log"
