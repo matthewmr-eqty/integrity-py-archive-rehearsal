@@ -563,32 +563,41 @@ jobs:
         run: python -m pip install griffe==1.14.0 griffe2md==1.2.5
 
       - name: Save the release's docs
+        # bash, not the default `bash -e`, so pipefail keeps the script's exit status through tee.
+        shell: bash
         run: scripts/archive_release.sh "$VERSION" | tee "$RUNNER_TEMP/archive.log"
 
-      # Safe to re-run: the branch is rebuilt from main and replaces the one a failed run pushed,
-      # and an existing PR is left as it is.
+      # Safe to re-run: a branch a failed run pushed is rebuilt from main, and a branch whose PR
+      # is open is left as it is, with any commits pushed to it.
       - name: Open the archive PR
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           branch="docs/archive-v$VERSION"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # A release that is not the newest is skipped by the script and changes nothing.
-          if [ -z "$(git status --porcelain docs-site docs/generated)" ]; then
+          # The script leaves docs-site alone when there is nothing to archive; docs/generated
+          # always differs, since the reports were downloaded into it.
+          if [ -z "$(git status --porcelain docs-site)" ]; then
             exit 0
           fi
+          if gh pr view "$branch" --json state --jq .state 2>/dev/null | grep -q OPEN; then
+            echo "The $VERSION archive PR is already open; left as it is."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -C "$branch"
           git add docs-site/archive docs/generated docs-site/src/content/docs
           git commit -m "docs: archive the $VERSION docs"
           git push --force origin "$branch"
-          if gh pr view "$branch" --json state --jq .state 2>/dev/null | grep -q OPEN; then
-            exit 0
-          fi
           {
             echo "Saves the $VERSION docs, with the real wheel reports, as the version the site serves once a newer release ships."
             echo
             echo "Opened by release.yml, so the docs build check does not run on it: check the Vercel preview."
+            if grep -q '^archive_release: backport' "$RUNNER_TEMP/archive.log"; then
+              echo
+              echo "A backport: latest's pages and reports are unchanged."
+            fi
             if grep -q '^archive_release: vercel.json' "$RUNNER_TEMP/archive.log"; then
               echo
               grep '^archive_release: vercel.json' "$RUNNER_TEMP/archive.log" | sed 's/^archive_release: /- [ ] /'
