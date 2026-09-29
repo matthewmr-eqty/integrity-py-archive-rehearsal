@@ -90,7 +90,7 @@ echo "archive_release: $VERSION → docs-site/archive/v$GROUP"
 
 # Latest documents $NEWEST, so a backport's reports stay out of it.
 if $BACKPORT; then
-  git -C "$ROOT" checkout -- docs/generated
+  git -C "$ROOT" checkout HEAD -- docs/generated
   git -C "$ROOT" clean -fdq -- docs/generated
   echo "archive_release: backport; latest's pages and reports are unchanged."
   exit 0

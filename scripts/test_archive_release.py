@@ -131,6 +131,17 @@ class ArchiveRelease(unittest.TestCase):
         self.assertEqual(self.repo.changed("docs/generated"), "")
         self.assertNotIn("vercel.json sends", out.stdout)
 
+    def test_a_backport_leaves_latest_s_reports_even_when_its_own_are_staged(self) -> None:
+        self.repo.write("docs-site/archive/folders.json", json.dumps({"2.4.2": "archive/v2.4"}))
+        self.repo.commit("2.4.2 archived")
+        self.repo.release("2.4.3")
+        self.repo.release("2.5.0")
+        self.repo.reports("2.4.3")
+        self.repo.git("add", "docs/generated")
+        out = self.repo.run("2.4.3")
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertEqual(self.repo.changed("docs/generated"), "")
+
     def test_a_backport_whose_tag_has_no_docs_site_fails_and_names_the_fix(self) -> None:
         self.repo.write("docs-site/archive/folders.json", json.dumps({"2.4.2": "archive/v2.4"}))
         self.repo.commit("2.4.2 archived")
@@ -157,7 +168,9 @@ class ArchiveRelease(unittest.TestCase):
     def test_no_versioned_redirect_left_to_retarget_is_not_a_failure(self) -> None:
         self.repo.write(
             "vercel.json",
-            json.dumps({"redirects": [{"source": "/(latest|dev)/(.*)\\.html", "destination": "/$2/"}]}),
+            json.dumps(
+                {"redirects": [{"source": "/(latest|dev)/(.*)\\.html", "destination": "/$2/"}]}
+            ),
         )
         self.repo.commit("redirects retargeted")
         self.repo.release("2.5.0")

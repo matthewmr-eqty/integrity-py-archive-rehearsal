@@ -520,6 +520,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      # To start CI on the archive branch: pushes made with github.token start no workflows.
+      actions: write
     env:
       VERSION: ${{ needs.release_metadata.outputs.version }}
     steps:
@@ -567,8 +569,8 @@ jobs:
         shell: bash
         run: scripts/archive_release.sh "$VERSION" | tee "$RUNNER_TEMP/archive.log"
 
-      # Safe to re-run: a branch a failed run pushed is rebuilt from main, and a branch whose PR
-      # is open is left as it is, with any commits pushed to it.
+      # Safe to re-run while the report artifacts last (one day): a branch a failed run pushed is
+      # rebuilt from main, and a branch whose PR is open is left as it is, with any commits on it.
       - name: Open the archive PR
         shell: bash
         env:
@@ -580,7 +582,9 @@ jobs:
           if [ -z "$(git status --porcelain docs-site)" ]; then
             exit 0
           fi
-          if gh pr view "$branch" --json state --jq .state 2>/dev/null | grep -q OPEN; then
+          # An API error fails the step here rather than reading as "no PR".
+          open=$(gh pr list --head "$branch" --state open --json number --jq length)
+          if [ "$open" != 0 ]; then
             echo "The $VERSION archive PR is already open; left as it is."
             exit 0
           fi
@@ -590,14 +594,16 @@ jobs:
           git add docs-site/archive docs/generated docs-site/src/content/docs
           git commit -m "docs: archive the $VERSION docs"
           git push --force origin "$branch"
+          # main requires CI's check, and this push starts nothing; a dispatch does.
+          gh workflow run ci.yml --ref "$branch"
           {
+            if grep -q '^archive_release: backport' "$RUNNER_TEMP/archive.log"; then
+              echo "A backport: the v$VERSION tag now outranks the folder main's folders.json names, so main's docs build fails until this merges. Merge it promptly. latest's pages and reports are unchanged."
+              echo
+            fi
             echo "Saves the $VERSION docs, with the real wheel reports, as the version the site serves once a newer release ships."
             echo
-            echo "Opened by release.yml, so the docs build check does not run on it: check the Vercel preview."
-            if grep -q '^archive_release: backport' "$RUNNER_TEMP/archive.log"; then
-              echo
-              echo "A backport: latest's pages and reports are unchanged."
-            fi
+            echo "Opened by release.yml with github.token, so no checks start on their own. The job starts CI on this branch; if \"Run Tests and Checks\" is missing, run CI on the branch from the Actions tab. The docs build check does not run: check the Vercel preview."
             if grep -q '^archive_release: vercel.json' "$RUNNER_TEMP/archive.log"; then
               echo
               grep '^archive_release: vercel.json' "$RUNNER_TEMP/archive.log" | sed 's/^archive_release: /- [ ] /'
