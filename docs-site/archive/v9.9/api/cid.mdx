@@ -1,0 +1,28 @@
+---
+title: "CID"
+description: "Content identifiers for data the SDK has hashed."
+---
+
+A CID is a content identifier: a stable identifier derived from the content of a file, directory, or serialized object.
+
+In `eqty_sdk`, CIDs are one of the core building blocks of provenance. Assets, computation inputs and outputs, and many low-level statements are connected through CIDs. If the content changes, the CID changes too, which is what makes it useful for integrity and reproducibility.
+
+Most users do not create `CID` objects directly very often. Instead, they usually get them from asset constructors such as `Dataset.from_path(...)`, or from existing manifests and statements.
+
+{/* generated api eqty_sdk._rust.CID */}
+A simple wrapper around a content identifier (CID) string. Provides a typed wrapper for CID strings with property access and string conversion.
+
+**Attributes:**
+
+- [**cid**](#eqty_sdk_rustcidcid) (`str`) – The formatted CID string.
+
+Creates a new CID, ensuring it is prefixed with `urn:cid:`.
+
+## `eqty_sdk._rust.CID.cid`
+
+```python
+cid: str
+```
+
+The formatted CID string.
+{/* end generated */}

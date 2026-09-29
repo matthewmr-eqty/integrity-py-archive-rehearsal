@@ -1,0 +1,44 @@
+---
+title: "Model Signing"
+description: "When the SDK attempts a model-signing statement, and how to opt in."
+---
+
+Model signing is explicit. A model-signing statement is only attempted when:
+
+- the asset was created with `Model.from_path(...)`
+- the provided path is a directory
+- the active signer uses a `SECP256R1` key
+- `_enable_model_signing_signature=True`
+
+Source: `examples/model-signing.py`
+
+{/* generated file examples/model-signing.py python */}
+```python
+from pathlib import Path
+
+from eqty_sdk import SIGNER_ALGORITHMS, Model, Signer, init, set_active_signer
+from eqty_sdk.compute.computation import Computation
+
+cfg = init()
+repo_root = Path(__file__).resolve().parents[1]
+
+signer = Signer.new(SIGNER_ALGORITHMS.SECP256R1)
+set_active_signer(signer)
+model = Model.from_path(
+    repo_root / "tests/fixtures",
+    name="SECP256R1 Model",
+    _enable_model_signing_signature=True,
+)
+
+Computation.new().add_input_cid(model.cid).add_output_object("Output").finalize()
+
+ctx = cfg.get_default_context()
+ctx.export(Path("./manifests/model-signing.json"))
+```
+{/* end generated */}
+
+Notes:
+
+- Only `SECP256R1` keys are supported for model-signing statements and sigstore bundle generation.
+- You must call `Model.from_path(...)` with a directory path and set `_enable_model_signing_signature=True` to get sigstore bundles.
+- If the active signer is not compatible with model signing, the SDK logs a warning instead of failing asset creation.

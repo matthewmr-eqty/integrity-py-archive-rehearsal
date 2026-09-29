@@ -1,0 +1,45 @@
+---
+title: "Context Linking"
+description: "Use multiple contexts when you want separate graphs for a root project and a child run, while still keeping the lineage connected through parent-child graph relationships."
+---
+
+Use multiple contexts when you want separate graphs for a root project and a child run, while still keeping the lineage connected through parent-child graph relationships.
+
+Source: `examples/context-linking.py`
+
+{/* generated file examples/context-linking.py python */}
+```python
+from pathlib import Path
+
+from eqty_sdk import Computation, Context, Dataset, Signer, init, set_active_signer
+
+root_ctx = Context.new("customer-project")
+cfg = init(default_context=root_ctx)
+run_ctx = Context.with_parent(cfg.get_default_context()).new("daily-run-2026-03-25")
+
+signer = Signer.load_or_create(name="Context Linking Signer")
+set_active_signer(signer)
+
+input_data = Dataset.with_context(run_ctx).from_object(
+    {"rows": 128, "source": "warehouse.snapshot"},
+    name="Input Batch",
+)
+output_data = Dataset.with_context(run_ctx).from_object(
+    {"summary": "cleaned and normalized"},
+    name="Normalized Batch",
+)
+
+Computation.with_context(run_ctx).new(name="Normalize Batch").add_input_cid(
+    [input_data.cid]
+).add_output_cid([output_data.cid]).finalize()
+
+cfg.get_default_context().export(Path("./manifests/customer-project.json"))
+run_ctx.export(Path("./manifests/daily-run-2026-03-25.json"))
+```
+{/* end generated */}
+
+Notes:
+
+- `Context.new(...)` creates a fresh local graph with a generated UUID.
+- `Context.with_parent(parent).new(...)` creates a child graph that stays linked to the parent in the graph tree.
+- `Dataset.with_context(ctx)` and `Computation.with_context(ctx)` let you attach statements to a specific context without changing the default context for the whole process.

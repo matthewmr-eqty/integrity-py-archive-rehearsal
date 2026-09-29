@@ -1,14 +1,1 @@
-eqty_sdk-2.4.2-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
-is consistent with the following platform tag:
-"manylinux_2_17_aarch64".
-
-The wheel references external versioned symbols in these
-system-provided shared libraries: libdl.so.2 with versions
-{'GLIBC_2.17'}, libm.so.6 with versions {'GLIBC_2.17'},
-libcrypto-8b83fee5.so.3 with versions {'OPENSSL_3.0.0', 'OPENSSL_3.0.3'}, libssl-5ea37d3b.so.3 with versions
-{'OPENSSL_3.0.0'}, libc.so.6 with versions {'GLIBC_2.17'},
-libgcc_s.so.1 with versions {'GCC_3.0', 'GCC_3.3', 'GCC_4.2.0'},
-libpthread.so.0 with versions {'GLIBC_2.17'}
-
-The wheel requires no external shared libraries! :)
-
+eqty_sdk-9.9.0-cp38-abi3-manylinux_2_17_aarch64.whl fixture

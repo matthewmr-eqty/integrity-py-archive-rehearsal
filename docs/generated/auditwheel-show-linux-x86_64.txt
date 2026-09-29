@@ -1,16 +1,1 @@
-eqty_sdk-2.4.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-is consistent with the following platform tag:
-"manylinux_2_17_x86_64".
-
-The wheel references external versioned symbols in these
-system-provided shared libraries: librt.so.1 with versions
-{'GLIBC_2.2.5'}, libm.so.6 with versions {'GLIBC_2.2.5'},
-libcrypto-fc218386.so.3 with versions {'OPENSSL_3.0.0', 'OPENSSL_3.0.3'}, libssl-26b68d81.so.3 with versions
-{'OPENSSL_3.0.0'}, libgcc_s.so.1 with versions {'GCC_3.0', 'GCC_3.3', 'GCC_4.2.0'}, libdl.so.2 with versions {'GLIBC_2.2.5'}, libc.so.6 with
-versions {'GLIBC_2.14', 'GLIBC_2.16', 'GLIBC_2.17', 'GLIBC_2.2.5', 'GLIBC_2.3', 'GLIBC_2.3.2', 'GLIBC_2.3.4', 'GLIBC_2.4', 'GLIBC_2.7', 'GLIBC_2.9'}, libpthread.so.0 with versions {'GLIBC_2.12', 'GLIBC_2.2.5'}
-
-This constrains the platform tag to "manylinux_2_17_x86_64". In order
-to achieve a more compatible tag, you would need to recompile a new
-wheel from source on a system with earlier versions of these
-libraries, such as a recent manylinux image.
-
+eqty_sdk-9.9.0-cp38-abi3-manylinux_2_17_x86_64.whl fixture

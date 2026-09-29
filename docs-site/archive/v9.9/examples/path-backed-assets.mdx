@@ -1,0 +1,42 @@
+---
+title: "Path-Backed Assets"
+description: "Many real SDK integrations register files and directories from disk rather than in-memory Python objects."
+---
+
+Many real SDK integrations register files and directories from disk rather than in-memory Python objects. This example shows the common `from_path(...)` flow for several asset types.
+
+Source: `examples/path-backed-assets.py`
+
+{/* generated file examples/path-backed-assets.py python */}
+```python
+from pathlib import Path
+
+from eqty_sdk import Code, Database, Dataset, Document, Signer, init, set_active_signer
+
+cfg = init()
+
+signer = Signer.load_or_create(name="Path Asset Signer")
+set_active_signer(signer)
+
+repo_root = Path(__file__).resolve().parents[1]
+fixture_path = repo_root / "tests/fixtures/assets/datasets/file/file_text.txt"
+source_path = repo_root / "examples/path-backed-assets.py"
+
+dataset = Dataset.from_path(fixture_path, name="Fixture Dataset")
+document = Document.from_path(fixture_path, name="Fixture Document")
+database = Database.from_path(fixture_path, name="Fixture Database")
+code = Code.from_path(source_path, name="Example Source")
+
+print(dataset.cid)
+print(document.cid)
+print(database.cid)
+print(code.cid)
+
+cfg.get_default_context().export(Path("./manifests/path-backed-assets.json"))
+```
+{/* end generated */}
+
+Notes:
+
+- `from_path(...)` hashes the resolved file or directory contents and uses that CID in the graph.
+- `Code`, `Document`, `Database`, and `Dataset` all support the same basic path-backed pattern.
