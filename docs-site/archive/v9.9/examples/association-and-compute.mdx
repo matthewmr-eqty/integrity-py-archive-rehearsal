@@ -1,0 +1,80 @@
+---
+title: "Association and Compute Statements"
+description: "This example creates assets, records a computation from an input dataset to an output dataset, and adds one association statement for each association type."
+---
+
+This example creates assets, records a computation from an input dataset to an output dataset, and adds one association statement for each association type: `CERTIFIES`, `INCLUDES`, and `IS_INSTANCE_OF`. Each association includes CID, UUID, and DID predicates. It then exports the context as a manifest.
+
+Source: `examples/association-and-compute.py`
+
+{/* generated file examples/association-and-compute.py python */}
+```python
+"""Create a manifest containing computation and association statements."""
+
+from pathlib import Path
+
+from eqty_sdk import (
+    ASSOCIATION_TYPES,
+    DID,
+    UUID,
+    Association,
+    Computation,
+    Dataset,
+    Model,
+    Signer,
+    init,
+    set_active_signer,
+)
+
+cfg = init()
+
+signer = Signer.load_or_create(name="Association and Compute Signer")
+set_active_signer(signer)
+
+raw_data = Dataset.from_object(
+    {"records": 128, "source": "warehouse.snapshot"},
+    name="Raw Customer Records",
+)
+trained_model = Model.from_object(
+    {"name": "customer-segmenter", "version": "1.0"},
+    name="Customer Segmenter",
+)
+predictions = Dataset.from_object(
+    {"segments": ["enterprise", "self-serve"]},
+    name="Customer Segments",
+)
+data_steward = DID.from_did_string("did:key:z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp")
+model_owner = DID.from_did_string("did:key:z6MknN7KqPUKfRkFqNmA4p6htpH7uUTiQzVtV3LZgMmMcV7S")
+
+Computation.new(name="Generate Customer Segments").add_input_cid([raw_data.cid]).add_output_cid(
+    [predictions.cid]
+).finalize()
+
+Association.new(predictions.cid, ASSOCIATION_TYPES.IS_INSTANCE_OF).add_predicate(
+    [
+        trained_model.cid,
+        UUID("123e4567-e89b-12d3-a456-426614174000"),
+        model_owner,
+    ]
+).finalize()
+
+Association.new(trained_model.cid, ASSOCIATION_TYPES.CERTIFIES).add_predicate(
+    [
+        predictions.cid,
+        UUID("123e4567-e89b-12d3-a456-426614174001"),
+        data_steward,
+    ]
+).finalize()
+
+Association.new(raw_data.cid, ASSOCIATION_TYPES.INCLUDES).add_predicate(
+    [
+        predictions.cid,
+        UUID("123e4567-e89b-12d3-a456-426614174002"),
+        data_steward,
+        model_owner,
+    ]
+).finalize()
+
+cfg.get_default_context().export(Path("./manifests/association-and-compute.json"))
+```
+{/* end generated */}

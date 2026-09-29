@@ -1,0 +1,55 @@
+---
+title: "Source"
+description: "Use this path when you cannot use a released wheel for your platform or when you intentionally want to build `eqty_sdk` from source."
+---
+
+Use this path when you cannot use a released wheel for your platform or when you intentionally want to build `eqty_sdk` from source.
+
+`eqty_sdk` includes a Rust extension built with `maturin`, so a source install requires a working Rust toolchain in addition to Python.
+
+## Requirements
+
+- Python 3.10 or newer
+- `pip`
+- Rust and `cargo`
+- a native compiler toolchain for your platform
+
+On Linux, that usually means a C compiler and common build tooling. On macOS, make sure the Xcode command line tools are installed.
+
+## Install Rust
+
+If `cargo` is not already available, install Rust first.
+
+```bash
+curl https://sh.rustup.rs -sSf | sh
+```
+
+After installation, ensure `cargo` is on your `PATH`:
+
+```bash
+cargo --version
+```
+
+## Install From The Source Distribution
+
+Once Rust is available, install the package with `pip` and force a source build:
+
+```bash
+python -m pip install --no-binary eqty_sdk eqty_sdk
+```
+
+`pip` will download the source distribution from PyPI, create a build environment, and compile the Rust extension as part of the install.
+
+If you are installing from a specific source archive you already downloaded, point `pip` at that file directly:
+
+```bash
+python -m pip install ./eqty_sdk-<version>.tar.gz
+```
+
+## Verify The Install
+
+```bash
+python -c "import eqty_sdk; print(eqty_sdk.__file__)"
+```
+
+If the import succeeds, the SDK and compiled extension were installed correctly.
