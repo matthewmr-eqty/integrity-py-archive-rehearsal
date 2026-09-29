@@ -17,6 +17,14 @@ fi
 GROUP="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
 ROOT=$(git rev-parse --show-toplevel)
 PYTHON=${PYTHON:-python3}
+
+# A backport would put its reports on latest's pages, so only the newest release is archived.
+NEWEST=$(git -C "$ROOT" tag --list 'v*.*.*' | sed -nE 's/^v([0-9]+\.[0-9]+\.[0-9]+)$/\1/p' |
+  sort -t. -k1,1n -k2,2n -k3,3n | tail -1)
+if [ "$VERSION" != "$NEWEST" ]; then
+  echo "archive_release: $VERSION is not the newest release ($NEWEST); nothing archived."
+  exit 0
+fi
 REPORTS=(
   auditwheel-show-linux-x86_64.txt
   auditwheel-show-linux-aarch64.txt

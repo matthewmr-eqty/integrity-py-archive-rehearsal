@@ -574,6 +574,10 @@ jobs:
           branch="docs/archive-v$VERSION"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # A release that is not the newest is skipped by the script and changes nothing.
+          if [ -z "$(git status --porcelain docs-site docs/generated)" ]; then
+            exit 0
+          fi
           git switch -C "$branch"
           git add docs-site/archive docs/generated docs-site/src/content/docs
           git commit -m "docs: archive the $VERSION docs"
