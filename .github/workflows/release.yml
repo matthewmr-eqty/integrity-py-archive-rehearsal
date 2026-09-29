@@ -520,7 +520,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      # To start CI on the archive branch: pushes made with github.token start no workflows.
+      # To start CI and the docs build check on the archive branch: pushes made with
+      # github.token start no workflows.
       actions: write
     env:
       VERSION: ${{ needs.release_metadata.outputs.version }}
@@ -569,46 +570,9 @@ jobs:
         shell: bash
         run: scripts/archive_release.sh "$VERSION" | tee "$RUNNER_TEMP/archive.log"
 
-      # Safe to re-run while the report artifacts last (one day): a branch a failed run pushed is
-      # rebuilt from main, and a branch whose PR is open is left as it is, with any commits on it.
+      # Safe to re-run while the report artifacts last (one day); see the script's header.
       - name: Open the archive PR
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          branch="docs/archive-v$VERSION"
-          # The script leaves docs-site alone when there is nothing to archive; docs/generated
-          # always differs, since the reports were downloaded into it.
-          if [ -z "$(git status --porcelain docs-site)" ]; then
-            exit 0
-          fi
-          # An API error fails the step here rather than reading as "no PR".
-          open=$(gh pr list --head "$branch" --state open --json number --jq length)
-          if [ "$open" != 0 ]; then
-            echo "The $VERSION archive PR is already open; left as it is."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git switch -C "$branch"
-          git add docs-site/archive docs/generated docs-site/src/content/docs
-          git commit -m "docs: archive the $VERSION docs"
-          git push --force origin "$branch"
-          # main requires CI's check, and this push starts nothing; a dispatch does.
-          gh workflow run ci.yml --ref "$branch"
-          {
-            if grep -q '^archive_release: backport' "$RUNNER_TEMP/archive.log"; then
-              echo "A backport: the v$VERSION tag now outranks the folder main's folders.json names, so main's docs build fails until this merges. Merge it promptly. latest's pages and reports are unchanged."
-              echo
-            fi
-            echo "Saves the $VERSION docs, with the real wheel reports, as the version the site serves once a newer release ships."
-            echo
-            echo "Opened by release.yml with github.token, so no checks start on their own. The job starts CI on this branch; if \"Run Tests and Checks\" is missing, run CI on the branch from the Actions tab. The docs build check does not run: check the Vercel preview."
-            if grep -q '^archive_release: vercel.json' "$RUNNER_TEMP/archive.log"; then
-              echo
-              grep '^archive_release: vercel.json' "$RUNNER_TEMP/archive.log" | sed 's/^archive_release: /- [ ] /'
-            fi
-          } > "$RUNNER_TEMP/body.md"
-          gh pr create --base main --head "$branch" \
-            --title "docs: archive the $VERSION docs" \
-            --body-file "$RUNNER_TEMP/body.md"
+        run: scripts/open_archive_pr.sh "$VERSION" "$RUNNER_TEMP/archive.log"

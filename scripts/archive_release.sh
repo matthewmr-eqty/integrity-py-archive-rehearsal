@@ -34,7 +34,7 @@ fi
 RELEASES=$(git -C "$ROOT" tag --list 'v*.*.*' | sed -nE 's/^v([0-9]+\.[0-9]+\.[0-9]+)$/\1/p' |
   sort -t. -k1,1n -k2,2n -k3,3n)
 NEWEST=$(tail -n 1 <<<"$RELEASES")
-GROUP_NEWEST=$(grep -F "$GROUP." <<<"$RELEASES" | awk -F. -v g="$GROUP" '$1"."$2 == g' | tail -n 1)
+GROUP_NEWEST=$(awk -F. -v g="$GROUP" '$1"."$2 == g' <<<"$RELEASES" | tail -n 1)
 # The group's folder must be its newest release, so an older patch has nothing to save.
 if [ "$VERSION" != "$GROUP_NEWEST" ]; then
   echo "archive_release: $VERSION is older than $GROUP_NEWEST; nothing archived."

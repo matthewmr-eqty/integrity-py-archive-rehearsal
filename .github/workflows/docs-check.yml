@@ -2,7 +2,9 @@ name: Docs build check
 
 # Builds docs-site/ on pull requests that touch it and attaches the built site, so a
 # reviewer can download and open it. Deploys nothing; .github/workflows/docs.yml owns deploys.
+# release.yml dispatches it on the archive PR's branch, which github.token's push cannot trigger.
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - 'docs-site/**'
