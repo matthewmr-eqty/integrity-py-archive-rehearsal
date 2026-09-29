@@ -1,0 +1,7 @@
+# Top-level sidebar order, mirroring the MkDocs nav. Names are filesystem names.
+# `index.mdx` is the root's own landing page and never a child.
+order:
+  - quick-start
+  - install
+  - examples
+  - api

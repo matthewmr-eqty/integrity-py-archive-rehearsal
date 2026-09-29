@@ -1,0 +1,112 @@
+---
+title: "Nested Contexts"
+description: "Use this example when a Governance Studio project should be the root of the graph tree, but you still want local subcontexts below it for project-level state and individual runs."
+---
+
+Use this example when a Governance Studio project should be the root of the graph tree, but you still want local subcontexts below it for project-level state and individual runs.
+
+Context graphs are built hierarchically. If data is registered in a parent graph and then referenced by CID in a child graph, the child graph can automatically pull that parent data into its own lineage. This is useful for keeping higher-level shared assets, such as project specs, prompts, or baseline models, in a parent context while allowing multiple child contexts to reuse them without re-registering the same logical object in each graph.
+
+## Create The Shared Model
+
+Source: `examples/creating-the-model.py`
+
+{/* generated file examples/creating-the-model.py python */}
+```python
+from pathlib import Path
+from uuid import UUID
+
+from eqty_sdk import Context, Model, Signer, compute, init, set_active_signer
+from eqty_sdk.asset import Asset, Configuration, Dataset, Document
+
+gov_studio_project = UUID("00000000-0000-0000-0000-000000000000")
+
+# Create a local subcontext under the Governance Studio project and make it the default.
+project_ctx = Context.from_uuid(gov_studio_project)
+model_ctx = Context.with_parent(project_ctx).new("Model Context")
+print(model_ctx)
+cfg = init(default_context=model_ctx)
+
+signer = Signer.load_or_create(name="Nested Contexts Signer")
+set_active_signer(signer)
+
+
+@compute(
+    metadata={"description": "Creates a simple llm model"},
+)
+def create_model(model_name: Asset, provider: Asset, version: Asset) -> Model:
+    return Model.from_object(
+        {
+            "model_name": model_name.value,
+            "provider": provider.value,
+            "version": version.value,
+        },
+        name=model_name.value,
+        description=f"{provider.value} {version.value}",
+    )
+
+
+name = Configuration.from_object("Meeting Summarizer", name="Model Name")
+provider = Dataset.from_object("Eqty", name="Model Provider")
+version = Document.from_object("v1", name="Version")
+create_model(name, provider, version)
+
+cfg.get_default_context().export(Path("./manifests/default-ctx.json"))
+```
+{/* end generated */}
+
+## Use The Shared Model In A Child Context
+
+Source: `examples/using-the-model.py`
+
+{/* generated file examples/using-the-model.py python */}
+```python
+from pathlib import Path
+from uuid import UUID
+
+from eqty_sdk import CID, Computation, Context, Dataset, Model, Signer, init, set_active_signer
+
+# UUID from `creating-the-model.py` actual UUID will vary
+model_context_uuid = UUID("fea03473-4614-464f-a2de-3cbfdef603bb")
+
+# Recreate the same default subcontext under the Governance Studio project.
+model_ctx = Context.from_uuid(model_context_uuid)
+ctx = Context.with_parent(model_ctx).new("Using the Model")
+cfg = init(default_context=ctx)
+
+signer = Signer.load_or_create(name="Nested Contexts Signer")
+set_active_signer(signer)
+
+# Reference a higher-level model asset from the parent context by CID.
+shared_model = Model.from_cid(
+    CID("bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku"),
+    name="Meeting Summarizer",
+)
+
+# During execution, create a child run context under the default context.
+run_ctx = Context.with_parent(cfg.get_default_context()).new("run-2026-03-26")
+
+input_data = Dataset.with_context(run_ctx).from_object(
+    {"system_prompt": "You are a helpful assistant.", "user_prompt": "Summarize the meeting."},
+    name="Prompt Inputs",
+)
+output_data = Dataset.with_context(run_ctx).from_object(
+    {"summary": ["Decisions made", "Follow-ups assigned", "Next milestone set"]},
+    name="Meeting Summary",
+)
+
+Computation.with_context(run_ctx).new(name="Summarize Meeting").add_input_cid(
+    [shared_model.cid, input_data.cid]
+).add_output_cid([output_data.cid]).finalize()
+
+run_ctx.export(Path("./manifests/run-ctx.json"))
+```
+{/* end generated */}
+
+Notes:
+
+- `Context.from_uuid(...)` takes the Governance Studio project UUID that should be the root of the graph tree.
+- `Context.with_parent(gov_ctx).new("...")` creates a local child context under the Governance Studio project. That child becomes the default context for the process in this example.
+- `Context.with_parent(cfg.get_default_context()).new("...")` creates a run-specific child context, which is therefore a grandchild of the Governance Studio project.
+- The first script registers the default subcontext and its shared model to `http://localhost:3050`.
+- The second script creates a run context under that default subcontext, references the shared model by CID, and registers the run context to the same service.

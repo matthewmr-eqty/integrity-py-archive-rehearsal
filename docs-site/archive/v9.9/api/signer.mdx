@@ -1,0 +1,143 @@
+---
+title: "Signer"
+description: "Signers are the identity and signing mechanism used by the SDK when it needs to produce signed provenance statements, attestations, or model-signing metadata."
+---
+
+Signers are the identity and signing mechanism used by the SDK when it needs to produce signed provenance statements, attestations, or model-signing metadata.
+
+A signer is required, as every statement that gets created is attributed back to being created by a Signer's underlying DID (Decentralized Identifier). A signer is part of process setup: create or load a signer, call [`set_active_signer`](./global-functions.mdx), and then let higher-level SDK operations use that active signer automatically.
+
+The SDK supports local signers and service-backed signers. Choose the one that matches your security model and operational environment.
+
+## Creating vs. loading
+
+Signers are persisted to disk, so a script that runs twice must not try to generate the
+same named signer twice.
+
+| Call | Behaviour |
+| --- | --- |
+| `Signer.new(...)` | Always generates a new key. Raises `ValueError` if `name` is already taken. |
+| `Signer.load(name)` | Loads a persisted signer. Raises `LookupError` if it does not exist. |
+| `Signer.load_or_create(name)` | Generates on the first run, reuses on later runs. Idempotent. |
+
+`Signer.load_or_create(...)` is the one to reach for in a script you expect to run more
+than once — it keeps the DID stable across runs.
+
+```python
+signer = Signer.load_or_create(name="My Workflow Signer")
+set_active_signer(signer)
+```
+
+## Signer
+
+{/* generated api eqty_sdk._rust.Signer */}
+Python-exposed signer information. Contains the name and DID key of a cryptographic signer.
+
+**Functions:**
+
+- [**new**](#eqty_sdk_rustsignernew) –
+- [**load**](#eqty_sdk_rustsignerload) – Loads a signer that was previously persisted under `name`. Raises `LookupError` if no such signer exists. Use `Signer.load_or_create(...)` to create one when it is missing. This works for any persisted signer regardless of how it was created, including `auth_service` and `vcomp_notary` signers.
+- [**load_or_create**](#eqty_sdk_rustsignerload_or_create) – Loads the signer named `name`, generating and persisting one if it does not exist yet. This is idempotent, so it is the right call for a script that runs more than once: the first run generates a key, later runs reuse it and keep a stable DID. If no algorithm is provided, Ed25519 is used. The algorithm is ignored when an existing signer is loaded.
+- [**vcomp_notary**](#eqty_sdk_rustsignervcomp_notary) – Creates a VComp notary signer and persists it to disk. If `name` is provided, the signer is stored under that name. When `_load_if_exists=True`, an existing signer with the same name is loaded instead of creating a new remote signer configuration.
+- [**auth_service**](#eqty_sdk_rustsignerauth_service) – Creates an Auth Service signer and persists it to disk. Requires the `EQTY_API_KEY` environment variable to be set. If `name` is provided, the signer is stored under that name. When `_load_if_exists=True`, an existing signer with the same name is loaded instead of creating a new remote signer configuration.
+- [**from_private_key**](#eqty_sdk_rustsignerfrom_private_key) –
+
+**Attributes:**
+
+- [**name**](#eqty_sdk_rustsignername) (`str`) – Returns the human-readable name of the signer. # Returns * `&str` - The signer's name
+- [**did_key**](#eqty_sdk_rustsignerdid_key) (`str`) – Returns the DID key of the signer. # Returns * `&str` - The signer's DID key string
+
+### `eqty_sdk._rust.Signer.name`
+
+```python
+name: str
+```
+
+Returns the human-readable name of the signer. # Returns * `&str` - The signer's name
+
+### `eqty_sdk._rust.Signer.did_key`
+
+```python
+did_key: str
+```
+
+Returns the DID key of the signer. # Returns * `&str` - The signer's DID key string
+
+### `eqty_sdk._rust.Signer.new`
+
+```python
+new(algorithm: Optional[SIGNER_ALGORITHMS] = None, name: Optional[str] = None, _load_if_exists: Optional[bool] = None) -> Signer
+```
+
+### `eqty_sdk._rust.Signer.load`
+
+```python
+load(name: str) -> Signer
+```
+
+Loads a signer that was previously persisted under `name`. Raises `LookupError` if no such signer exists. Use `Signer.load_or_create(...)` to create one when it is missing. This works for any persisted signer regardless of how it was created, including `auth_service` and `vcomp_notary` signers.
+
+### `eqty_sdk._rust.Signer.load_or_create`
+
+```python
+load_or_create(name: str, algorithm: Optional[SIGNER_ALGORITHMS] = None) -> Signer
+```
+
+Loads the signer named `name`, generating and persisting one if it does not exist yet. This is idempotent, so it is the right call for a script that runs more than once: the first run generates a key, later runs reuse it and keep a stable DID. If no algorithm is provided, Ed25519 is used. The algorithm is ignored when an existing signer is loaded.
+
+### `eqty_sdk._rust.Signer.vcomp_notary`
+
+```python
+vcomp_notary(url: Optional[str] = None, name: Optional[str] = None, _load_if_exists: Optional[bool] = None) -> Signer
+```
+
+Creates a VComp notary signer and persists it to disk. If `name` is provided, the signer is stored under that name. When `_load_if_exists=True`, an existing signer with the same name is loaded instead of creating a new remote signer configuration.
+
+### `eqty_sdk._rust.Signer.auth_service`
+
+```python
+auth_service(url: str, name: Optional[str] = None, _load_if_exists: Optional[bool] = None) -> Signer
+```
+
+Creates an Auth Service signer and persists it to disk. Requires the `EQTY_API_KEY` environment variable to be set. If `name` is provided, the signer is stored under that name. When `_load_if_exists=True`, an existing signer with the same name is loaded instead of creating a new remote signer configuration.
+
+### `eqty_sdk._rust.Signer.from_private_key`
+
+```python
+from_private_key(algorithm: SIGNER_ALGORITHMS, private_key: str, name: Optional[str] = None, _load_if_exists: Optional[bool] = None) -> Signer
+```
+{/* end generated */}
+
+## Signer Algorithms
+
+The algorithm enum controls which key type is created for signer flows that generate or import keys.
+
+Most users can use the default unless they have an interoperability or policy reason to choose a specific algorithm.
+
+{/* generated api eqty_sdk._rust.SIGNER_ALGORITHMS */}
+Supported signer algorithm identifiers.
+
+**Attributes:**
+
+- [**ED25519**](#eqty_sdk_rustsigner_algorithmsed25519) (`SIGNER_ALGORITHMS`) –
+- [**SECP256K1**](#eqty_sdk_rustsigner_algorithmssecp256k1) (`SIGNER_ALGORITHMS`) –
+- [**SECP256R1**](#eqty_sdk_rustsigner_algorithmssecp256r1) (`SIGNER_ALGORITHMS`) –
+
+### `eqty_sdk._rust.SIGNER_ALGORITHMS.ED25519`
+
+```python
+ED25519: SIGNER_ALGORITHMS
+```
+
+### `eqty_sdk._rust.SIGNER_ALGORITHMS.SECP256K1`
+
+```python
+SECP256K1: SIGNER_ALGORITHMS
+```
+
+### `eqty_sdk._rust.SIGNER_ALGORITHMS.SECP256R1`
+
+```python
+SECP256R1: SIGNER_ALGORITHMS
+```
+{/* end generated */}

@@ -1,0 +1,38 @@
+---
+title: "Auth Service Signer"
+description: "This example creates or reuses a signer backed by an auth service instead of generating a purely local signer."
+---
+
+This example creates or reuses a signer backed by an auth service instead of generating a purely local signer.
+
+Source: `examples/auth-service-signer.py`
+
+{/* generated file examples/auth-service-signer.py python */}
+```python
+from pathlib import Path
+
+from eqty_sdk import Dataset, Signer, init, set_active_signer
+
+cfg = init()
+
+signer = Signer.auth_service(
+    "http://localhost:3050",
+    name="gov-studio-signer",
+    _load_if_exists=True,
+)
+set_active_signer(signer)
+
+payload = Dataset.from_object(
+    {"message": "Signed with an auth-service signer"},
+    name="Remote Signed Payload",
+)
+
+print(payload.cid)
+cfg.get_default_context().export(Path("./manifests/auth-service-signer.json"))
+```
+{/* end generated */}
+
+Notes:
+
+- `EQTY_API_KEY` must be set before calling `Signer.auth_service(...)`.
+- `_load_if_exists=True` is useful for repeated runs because it reuses the persisted signer configuration instead of creating a new one every time.

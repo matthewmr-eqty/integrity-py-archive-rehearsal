@@ -1,0 +1,260 @@
+---
+title: "Compute"
+description: "Compute nodes define the roots of a lineage graph in `eqty_sdk`."
+---
+
+Compute nodes define the roots of a lineage graph in `eqty_sdk`. When you use the `@compute` decorator, the SDK records the computation node along with its declared inputs and produced outputs, and that computation becomes the entry point for traversing the rest of the graph.
+
+This matters when exporting or viewing a manifest from a context: the compute nodes present in that context are used to build out the rest of the graph by following their linked assets, statements, and related lineage edges. In practice, that means compute-decorated functions are often the highest-value nodes to include when you want a manifest to tell a coherent end-to-end story.
+
+Most users will interact with compute through the `@compute` decorator, but the `Computation` object is useful when you want to construct or inspect computation metadata directly. Reach for it when you need more explicit control over the computation node itself, such as naming a computation, attaching metadata outside the decorator flow, or working with lineage structures in a more programmatic way.
+
+{/* generated api eqty_sdk.compute */}
+**Modules:**
+
+- [**computation**](#eqty_sdkcomputecomputation) –
+- [**compute**](#eqty_sdkcomputecompute) –
+
+**Classes:**
+
+- [**Compute**](#eqty_sdkcomputecompute) – A wrapper class to hold and execute a function.
+- [**Computation**](#eqty_sdkcomputecomputation) –
+
+## `eqty_sdk.compute.compute`
+
+**Classes:**
+
+- [**Compute**](#eqty_sdkcomputecomputecompute) – A wrapper class to hold and execute a function.
+
+### `eqty_sdk.compute.compute.Compute`
+
+```python
+Compute(func: Callable[..., Any], metadata: Optional[Dict[str, Any]] = None, _store: Optional[bool] = None, ctx: Optional[Context] = None, **kwargs)
+```
+
+A wrapper class to hold and execute a function.
+
+This class is used to wrap a function and execute it with the provided arguments.
+
+Args:
+func: The function to be wrapped.
+metadata: Additional metadata associated with the computation.
+
+## `eqty_sdk.compute.computation`
+
+**Classes:**
+
+- [**Computation**](#eqty_sdkcomputecomputationcomputation) –
+
+### `eqty_sdk.compute.computation.Computation`
+
+```python
+Computation()
+```
+
+**Functions:**
+
+- [**add_input_cid**](#eqty_sdkcomputecomputationcomputationadd_input_cid) – Adds the CID(s) to the computations input list.
+- [**add_input_path**](#eqty_sdkcomputecomputationcomputationadd_input_path) – Resolves the provide path(s) and adds the computed CID(s) to the computations input list.
+- [**add_input_object**](#eqty_sdkcomputecomputationcomputationadd_input_object) – Serializes the obj(s), then calculates the CID for the serialized bytes. The CID(s) are appended to the computations input list.
+- [**add_output_cid**](#eqty_sdkcomputecomputationcomputationadd_output_cid) – Adds the CID(s) to the computations output list.
+- [**add_output_path**](#eqty_sdkcomputecomputationcomputationadd_output_path) – Resolves the provide path(s) and adds the computed CID(s) to the computations output list.
+- [**add_output_object**](#eqty_sdkcomputecomputationcomputationadd_output_object) – Serializes the obj(s), then calculates the CID for the serialized bytes. The CID(s) are appended to the computations output list.
+- [**set_computation_cid**](#eqty_sdkcomputecomputationcomputationset_computation_cid) – Sets the computation CID with the provided cid.
+- [**set_computation_path**](#eqty_sdkcomputecomputationcomputationset_computation_path) – Resolves the path; cids the contents, then sets the computations CID.
+- [**set_computation_object**](#eqty_sdkcomputecomputationcomputationset_computation_object) – Serializes the obj, then calculates the CID for the serialized bytes and sets the computations cid.
+- [**finalize**](#eqty_sdkcomputecomputationcomputationfinalize) – Creates the computation statement, and adds a metadata statement for the computation statement.
+
+#### `eqty_sdk.compute.computation.Computation.add_input_cid`
+
+```python
+add_input_cid(cid: Union[List[CID], CID]) -> Computation
+```
+
+Adds the CID(s) to the computations input list.
+
+#### `eqty_sdk.compute.computation.Computation.add_input_path`
+
+```python
+add_input_path(path: Union[List[Path], List[str], Path, str]) -> Computation
+```
+
+Resolves the provide path(s) and adds the computed CID(s) to the computations input list.
+
+#### `eqty_sdk.compute.computation.Computation.add_input_object`
+
+```python
+add_input_object(obj: Union[List[Any], Any]) -> Computation
+```
+
+Serializes the obj(s), then calculates the CID for the serialized bytes. The CID(s) are appended to the computations input list.
+
+#### `eqty_sdk.compute.computation.Computation.add_output_cid`
+
+```python
+add_output_cid(cid: Union[List[CID], CID]) -> Computation
+```
+
+Adds the CID(s) to the computations output list.
+
+#### `eqty_sdk.compute.computation.Computation.add_output_path`
+
+```python
+add_output_path(path: Union[List[Path], List[str], Path, str]) -> Computation
+```
+
+Resolves the provide path(s) and adds the computed CID(s) to the computations output list.
+
+#### `eqty_sdk.compute.computation.Computation.add_output_object`
+
+```python
+add_output_object(obj: Union[List[Any], Any]) -> Computation
+```
+
+Serializes the obj(s), then calculates the CID for the serialized bytes. The CID(s) are appended to the computations output list.
+
+#### `eqty_sdk.compute.computation.Computation.set_computation_cid`
+
+```python
+set_computation_cid(cid: CID) -> Computation
+```
+
+Sets the computation CID with the provided cid.
+
+#### `eqty_sdk.compute.computation.Computation.set_computation_path`
+
+```python
+set_computation_path(path: Union[Path, str]) -> Computation
+```
+
+Resolves the path; cids the contents, then sets the computations CID.
+
+#### `eqty_sdk.compute.computation.Computation.set_computation_object`
+
+```python
+set_computation_object(obj: Any) -> Computation
+```
+
+Serializes the obj, then calculates the CID for the serialized bytes and sets the computations cid.
+
+#### `eqty_sdk.compute.computation.Computation.finalize`
+
+```python
+finalize() -> Computation
+```
+
+Creates the computation statement, and adds a metadata statement for the computation statement.
+
+## `eqty_sdk.compute.Compute`
+
+```python
+Compute(func: Callable[..., Any], metadata: Optional[Dict[str, Any]] = None, _store: Optional[bool] = None, ctx: Optional[Context] = None, **kwargs)
+```
+
+A wrapper class to hold and execute a function.
+
+This class is used to wrap a function and execute it with the provided arguments.
+
+Args:
+func: The function to be wrapped.
+metadata: Additional metadata associated with the computation.
+
+## `eqty_sdk.compute.Computation`
+
+```python
+Computation()
+```
+
+**Functions:**
+
+- [**add_input_cid**](#eqty_sdkcomputecomputationadd_input_cid) – Adds the CID(s) to the computations input list.
+- [**add_input_path**](#eqty_sdkcomputecomputationadd_input_path) – Resolves the provide path(s) and adds the computed CID(s) to the computations input list.
+- [**add_input_object**](#eqty_sdkcomputecomputationadd_input_object) – Serializes the obj(s), then calculates the CID for the serialized bytes. The CID(s) are appended to the computations input list.
+- [**add_output_cid**](#eqty_sdkcomputecomputationadd_output_cid) – Adds the CID(s) to the computations output list.
+- [**add_output_path**](#eqty_sdkcomputecomputationadd_output_path) – Resolves the provide path(s) and adds the computed CID(s) to the computations output list.
+- [**add_output_object**](#eqty_sdkcomputecomputationadd_output_object) – Serializes the obj(s), then calculates the CID for the serialized bytes. The CID(s) are appended to the computations output list.
+- [**set_computation_cid**](#eqty_sdkcomputecomputationset_computation_cid) – Sets the computation CID with the provided cid.
+- [**set_computation_path**](#eqty_sdkcomputecomputationset_computation_path) – Resolves the path; cids the contents, then sets the computations CID.
+- [**set_computation_object**](#eqty_sdkcomputecomputationset_computation_object) – Serializes the obj, then calculates the CID for the serialized bytes and sets the computations cid.
+- [**finalize**](#eqty_sdkcomputecomputationfinalize) – Creates the computation statement, and adds a metadata statement for the computation statement.
+
+### `eqty_sdk.compute.Computation.add_input_cid`
+
+```python
+add_input_cid(cid: Union[List[CID], CID]) -> Computation
+```
+
+Adds the CID(s) to the computations input list.
+
+### `eqty_sdk.compute.Computation.add_input_path`
+
+```python
+add_input_path(path: Union[List[Path], List[str], Path, str]) -> Computation
+```
+
+Resolves the provide path(s) and adds the computed CID(s) to the computations input list.
+
+### `eqty_sdk.compute.Computation.add_input_object`
+
+```python
+add_input_object(obj: Union[List[Any], Any]) -> Computation
+```
+
+Serializes the obj(s), then calculates the CID for the serialized bytes. The CID(s) are appended to the computations input list.
+
+### `eqty_sdk.compute.Computation.add_output_cid`
+
+```python
+add_output_cid(cid: Union[List[CID], CID]) -> Computation
+```
+
+Adds the CID(s) to the computations output list.
+
+### `eqty_sdk.compute.Computation.add_output_path`
+
+```python
+add_output_path(path: Union[List[Path], List[str], Path, str]) -> Computation
+```
+
+Resolves the provide path(s) and adds the computed CID(s) to the computations output list.
+
+### `eqty_sdk.compute.Computation.add_output_object`
+
+```python
+add_output_object(obj: Union[List[Any], Any]) -> Computation
+```
+
+Serializes the obj(s), then calculates the CID for the serialized bytes. The CID(s) are appended to the computations output list.
+
+### `eqty_sdk.compute.Computation.set_computation_cid`
+
+```python
+set_computation_cid(cid: CID) -> Computation
+```
+
+Sets the computation CID with the provided cid.
+
+### `eqty_sdk.compute.Computation.set_computation_path`
+
+```python
+set_computation_path(path: Union[Path, str]) -> Computation
+```
+
+Resolves the path; cids the contents, then sets the computations CID.
+
+### `eqty_sdk.compute.Computation.set_computation_object`
+
+```python
+set_computation_object(obj: Any) -> Computation
+```
+
+Serializes the obj, then calculates the CID for the serialized bytes and sets the computations cid.
+
+### `eqty_sdk.compute.Computation.finalize`
+
+```python
+finalize() -> Computation
+```
+
+Creates the computation statement, and adds a metadata statement for the computation statement.
+{/* end generated */}
