@@ -1,0 +1,50 @@
+---
+title: "Min Version"
+description: "Minimum supported Python and pip versions, and what the published wheels need at runtime."
+---
+
+- Python: 3.10
+- pip: latest supported release
+- Linux wheel runtime requirements are release- and architecture-specific. See the reports below.
+
+Pre-compiled wheels are available for common systems. If a wheel is not available for your target platform, use [Install From Source](./source.mdx) instead.
+
+## Linux Wheel Requirements
+
+These reports are generated during the release workflow from the actual published Linux wheels and contain the output of `auditwheel show`.
+
+### x86_64
+
+{/* generated file docs/generated/auditwheel-show-linux-x86_64.txt text */}
+```text
+eqty_sdk-9.8.1-cp38-abi3-manylinux_2_17_x86_64.whl fixture
+```
+{/* end generated */}
+
+### aarch64
+
+{/* generated file docs/generated/auditwheel-show-linux-aarch64.txt text */}
+```text
+eqty_sdk-9.8.1-cp38-abi3-manylinux_2_17_aarch64.whl fixture
+```
+{/* end generated */}
+
+## macOS Wheel Requirements
+
+These reports are generated during the release workflow from the actual published macOS wheels and contain the output of `otool -L`.
+
+### arm64
+
+{/* generated file docs/generated/otool-show-macos-arm64.txt text */}
+```text
+macOS arm64 fixture 9.8.1
+```
+{/* end generated */}
+
+### x86_64
+
+{/* generated file docs/generated/otool-show-macos-x86_64.txt text */}
+```text
+macOS x86_64 fixture 9.8.1
+```
+{/* end generated */}

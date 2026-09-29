@@ -1,0 +1,157 @@
+---
+title: "Statements"
+description: "Low-level statement functions, for when assets, @compute and contexts do not fit."
+---
+
+These functions are for advanced use only. Prefer the higher-level SDK features such as assets, `@compute`, contexts, services, and signer workflows when those cover your use case. Reach for the low-level statement APIs when you need to construct or attach statements manually.
+
+## Functions
+
+{/* generated api eqty_sdk._rust.statements.add_data_statement */}
+### `eqty_sdk._rust.statements.add_data_statement`
+
+```python
+add_data_statement(data: List[_CID], *, _skip_proof: Optional[bool] = None, context: Optional[_Context] = None) -> List[_CID]
+```
+{/* end generated */}
+
+{/* generated api eqty_sdk._rust.statements.add_association_statement */}
+### `eqty_sdk._rust.statements.add_association_statement`
+
+```python
+add_association_statement(subject: str, association: List[str], association_type: _PyAssociationType, *, _skip_proof: Optional[bool] = None, context: Optional[_Context] = None) -> List[_CID]
+```
+{/* end generated */}
+
+### Association Types
+
+`ASSOCIATION_TYPES.CERTIFIES`
+
+`ASSOCIATION_TYPES.INCLUDES`
+
+`ASSOCIATION_TYPES.IS_INSTANCE_OF`
+
+## Association
+
+A builder for constructing and finalizing association statements.
+
+{/* generated api eqty_sdk.statements.Association */}
+### `eqty_sdk.statements.Association`
+
+A builder for constructing and finalizing association statements.
+
+An association links a subject (a `CID`, `DID`, or `UUID`) to one or more
+predicates via an `ASSOCIATION_TYPES` relationship. Use `Association.new()`
+or `Association.with_context()` to create an instance, attach predicates
+with `add_predicate()`, and call `finalize()` to write the association
+statement.
+
+**Functions:**
+
+- [**new**](#eqty_sdkstatementsassociationnew) – Create a new `Association` builder for the given subject and type.
+- [**with_context**](#eqty_sdkstatementsassociationwith_context) – Return a factory whose `new()` builds `Association` instances bound to `ctx`.
+- [**add_predicate**](#eqty_sdkstatementsassociationadd_predicate) – Add one or more predicates (`CID`, `DID`, or `UUID`) to the association.
+- [**finalize**](#eqty_sdkstatementsassociationfinalize) – Write the association statement and return `self`.
+
+#### `eqty_sdk.statements.Association.new`
+
+```python
+new(subject: CID | DID | UUID, association_type: PyAssociationType, **kwargs) -> Association
+```
+
+Create a new `Association` builder for the given subject and type.
+
+Args:
+subject: The `CID`, `DID`, or `UUID` the association is about.
+association_type: One of the `ASSOCIATION_TYPES` values.
+
+#### `eqty_sdk.statements.Association.with_context`
+
+```python
+with_context(ctx: Context)
+```
+
+Return a factory whose `new()` builds `Association` instances bound to `ctx`.
+
+#### `eqty_sdk.statements.Association.add_predicate`
+
+```python
+add_predicate(predicate: CID | List[CID] | DID | List[DID] | UUID | List[UUID]) -> Association
+```
+
+Add one or more predicates (`CID`, `DID`, or `UUID`) to the association.
+
+#### `eqty_sdk.statements.Association.finalize`
+
+```python
+finalize() -> Association
+```
+
+Write the association statement and return `self`.
+{/* end generated */}
+
+{/* generated api eqty_sdk._rust.statements.add_computation_statement */}
+### `eqty_sdk._rust.statements.add_computation_statement`
+
+```python
+add_computation_statement(inputs: List[_CID], outputs: List[_CID], computation: Optional[_CID] = None, *, operated_by: Optional[str] = None, executed_on: Optional[str] = None, _skip_proof: Optional[bool] = None, context: Optional[_Context] = None) -> List[_CID]
+```
+{/* end generated */}
+
+{/* generated api eqty_sdk._rust.statements.add_did_statement */}
+### `eqty_sdk._rust.statements.add_did_statement`
+
+```python
+add_did_statement(did: str, *, _skip_proof: Optional[bool] = None, context: Optional[_Context] = None) -> List[_CID]
+```
+{/* end generated */}
+
+{/* generated api eqty_sdk._rust.statements.add_entity_statement */}
+### `eqty_sdk._rust.statements.add_entity_statement`
+
+```python
+add_entity_statement(entity: str, *, _skip_proof: Optional[bool] = None, context: Optional[_Context] = None) -> List[_CID]
+```
+{/* end generated */}
+
+{/* generated api eqty_sdk._rust.statements.add_metadata_statement */}
+### `eqty_sdk._rust.statements.add_metadata_statement`
+
+```python
+add_metadata_statement(subject: str, metadata: str, *, _skip_proof: Optional[bool] = None, context: Optional[_Context] = None) -> List[_CID]
+```
+{/* end generated */}
+
+{/* generated api eqty_sdk._rust.statements.add_storage_statement */}
+### `eqty_sdk._rust.statements.add_storage_statement`
+
+```python
+add_storage_statement(data: str, stored_on: str, *, operated_by: Optional[str] = None, _skip_proof: Optional[bool] = None, context: Optional[_Context] = None) -> List[_CID]
+```
+
+Adds a storage statement linking data to a storage location.
+{/* end generated */}
+
+{/* generated api eqty_sdk._rust.statements.add_governance_statement */}
+### `eqty_sdk._rust.statements.add_governance_statement`
+
+```python
+add_governance_statement(subject: str, document: str, *, _skip_proof: Optional[bool] = None, context: Optional[_Context] = None) -> List[_CID]
+```
+{/* end generated */}
+
+{/* generated api eqty_sdk._rust.statements.add_vc_statement */}
+### `eqty_sdk._rust.statements.add_vc_statement`
+
+```python
+add_vc_statement(subject: str, *, timestamp: Optional[str] = None, context: Optional[_Context] = None) -> _CID
+```
+{/* end generated */}
+
+{/* generated api eqty_sdk._rust.statements.add_model_signing_statement */}
+### `eqty_sdk._rust.statements.add_model_signing_statement`
+
+```python
+add_model_signing_statement(collection_cid: str, model_signing_name: str, *, context: Optional[_Context] = None) -> _CID
+```
+{/* end generated */}

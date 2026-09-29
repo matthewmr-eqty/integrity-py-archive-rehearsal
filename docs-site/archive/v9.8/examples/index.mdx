@@ -1,0 +1,19 @@
+---
+title: "Overview"
+description: "These examples show how to use the SDK end to end instead of one API surface at a time."
+---
+
+These examples show how to use the SDK end to end instead of one API surface at a time.
+
+- `Basic Workflow`: initialize the SDK, create input assets, define a `@compute` function, execute it, and export a manifest.
+- `Async Compute`: use `@compute` with async functions and async generators.
+- `Association and Compute Statements`: create computation and association statements, then export them in one manifest.
+- `Context Linking`: split lineage across root and child graphs while keeping them connected.
+- `Nested Contexts`: create a local default context under a Governance Studio project, then create run-specific child contexts beneath it.
+- `Path-Backed Assets`: register files from disk with `from_path(...)`.
+- `Auth Service Signer`: reuse a persisted signer that delegates signing through an auth service.
+- `Service Registering`: create a graph for a Governance Studio project and register it with a service endpoint.
+- `Spark Parquet Input`: wrap a Spark DataFrame so provenance is attached to the parquet source on disk.
+- `Model Signing`: opt in to model-signing statements for model directories.
+
+The source files live under `examples/`.

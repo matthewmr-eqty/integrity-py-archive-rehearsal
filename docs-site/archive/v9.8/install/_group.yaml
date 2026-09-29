@@ -1,0 +1,5 @@
+label: Install
+order:
+  - min-version
+  - package-managers
+  - source
