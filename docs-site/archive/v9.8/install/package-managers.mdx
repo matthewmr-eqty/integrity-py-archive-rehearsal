@@ -1,0 +1,49 @@
+---
+title: "Package Managers"
+description: "Install eqty_sdk from PyPI with pip, uv or Poetry."
+---
+
+`eqty_sdk` is published on the public [Python Package Index (PyPI)](https://pypi.org/).
+No Eqty package-index URL or installation credentials are required.
+
+## pip
+
+```bash
+python -m pip install eqty_sdk
+```
+
+## uv (project)
+
+In a uv project, add the SDK as a normal dependency:
+
+```bash
+uv add eqty-sdk
+```
+
+This records the dependency in `pyproject.toml` and updates the lockfile, so a
+later `uv sync` reproduces the environment.
+
+## uv (no project)
+
+To install into an activated environment without changing a project file:
+
+```bash
+uv pip install eqty_sdk
+```
+
+`uv pip install` does not record the dependency. In a uv project, use `uv add`
+instead so a later `uv sync` retains it.
+
+## Poetry
+
+```bash
+poetry add eqty_sdk
+```
+
+## Verify
+
+```bash
+python -c "import eqty_sdk; print(eqty_sdk.__file__)"
+```
+
+Next: [Quick Start](../quick-start.mdx).

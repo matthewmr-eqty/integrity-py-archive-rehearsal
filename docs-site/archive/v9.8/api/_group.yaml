@@ -1,0 +1,16 @@
+label: API Reference
+indexLabel: Overview
+order:
+  - init-and-config
+  - global-functions
+  - cid
+  - did
+  - uuid
+  - assets
+  - compute
+  - context
+  - declaration
+  - service
+  - signer
+  - statements
+  - verification

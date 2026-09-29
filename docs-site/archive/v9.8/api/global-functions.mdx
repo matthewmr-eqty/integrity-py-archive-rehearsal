@@ -1,0 +1,48 @@
+---
+title: "Global Functions"
+description: "These functions affect SDK-global state."
+---
+
+These functions affect SDK-global state. Most users only need them occasionally, usually during setup, testing, or local environment cleanup.
+
+## `purge_blob_store`
+
+Use this when you want to clear the local blob cache managed by the SDK and start from a clean state. This is mainly useful in tests, local development, or when you intentionally want to discard previously stored blobs.
+
+{/* generated api eqty_sdk.purge_blob_store */}
+### `eqty_sdk.purge_blob_store`
+
+```python
+purge_blob_store() -> None
+```
+
+Purges all blobs from the blob store.
+{/* end generated */}
+
+## `purge_statement_store`
+
+Use this when you want to reset the local statement/index store and remove previously recorded lineage state. This is most useful in tests and local debugging, and is usually not something you should call in normal application flows.
+
+{/* generated api eqty_sdk.purge_statement_store */}
+### `eqty_sdk.purge_statement_store`
+
+```python
+purge_statement_store() -> None
+```
+
+Purges all statemetns from the store.
+{/* end generated */}
+
+## `set_active_signer`
+
+Use this to set the signer that higher-level SDK operations should use when they need to emit signed statements or related attestations. This must be called during setup, typically during process startup, so the rest of your workflow can rely on that active signer. It accepts a [Signer](./signer.mdx) object.
+
+{/* generated api eqty_sdk.set_active_signer */}
+### `eqty_sdk.set_active_signer`
+
+```python
+set_active_signer(signer: Signer) -> None
+```
+
+Set the active signer used by higher-level SDK operations.
+{/* end generated */}

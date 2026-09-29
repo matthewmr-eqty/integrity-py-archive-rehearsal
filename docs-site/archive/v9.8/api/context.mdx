@@ -1,0 +1,129 @@
+---
+title: "Context"
+description: "A context is a logical graph container."
+---
+
+A context is a logical graph container. It groups related statements, assets, and computations so they can be exported, viewed, or registered together.
+
+Contexts matter because they define the boundary of a manifest and the unit of organization for a workflow. If you want to keep different projects, runs, customers, or Governance Studio graphs separate, use different contexts. Parent-child contexts are useful when you want multiple runs or subgraphs to roll up under a larger project-level graph.
+
+Most users should create a context early, pass it to `init(default_context=...)`, and then let assets and computations attach to that context by default. Use `Context.from_uuid(...)` when you want the graph to correspond to an existing Governance Studio project, and use `export(...)`, `import_manifest(...)`, or `register(...)` when moving the graph between local state and external systems.
+
+After a successful registration, `register()` can remove the local statement records, the blobs uploaded for that registration, or both:
+
+```python
+context.register(service, delete_statements=True)
+context.register(service, delete_blobs=True)
+context.register(service, delete_statements=True, delete_blobs=True)
+```
+
+Deleting statements keeps the context itself so it can be reused. Blob cleanup deletes the uploaded blobs without checking whether another local context references the same blob.
+
+{/* generated api eqty_sdk._rust.Context */}
+A structure for organizing related statements hierarchically in the database. Graph context groups statements together with optional parent-child relationships, enabling organizational structure for lineage graphs.
+
+**Functions:**
+
+- [**new**](#eqty_sdk_rustcontextnew) – Creates a new root context with the given name. Use this to start a new local lineage graph that does not have a parent context. If the global config is initialized, the context is persisted to sqlite immediately and can be used as the default context for subsequent asset and computation registration.
+- [**with_parent**](#eqty_sdk_rustcontextwith_parent) – Returns a factory that creates contexts with the provided parent.
+- [**from_uuid**](#eqty_sdk_rustcontextfrom_uuid) – Creates a new context with the given uuid.
+- [**register**](#eqty_sdk_rustcontextregister) – Registers this context, its ancestors, statements, and blobs with a service. Set `delete_blobs` to remove the locally stored blobs uploaded for this registration, `delete_statements` to remove this context's local statement records, or both to remove both after a successful registration. Cleanup is only attempted after all registration requests succeed. `delete_blobs` does not check whether another local context also references a blob.
+- [**delete_tree**](#eqty_sdk_rustcontextdelete_tree) – Deletes this context, all descendant contexts, and their local statements. This only removes local context and statement records; it does not delete blobs from the local blob store. Use this when the context hierarchy is no longer needed locally.
+- [**delete**](#eqty_sdk_rustcontextdelete) – Deletes this context and its local statements. Raises an error if this context has child contexts. Use `delete_tree()` to delete a context together with its descendants. This does not delete blobs from the local blob store.
+- [**export**](#eqty_sdk_rustcontextexport) – Exports this context's statements and blobs to a manifest JSON file.
+- [**import_manifest**](#eqty_sdk_rustcontextimport_manifest) – Imports the statements and blobs from a manifest file to this context.
+
+**Attributes:**
+
+- [**id**](#eqty_sdk_rustcontextid) (`UUID`) – Unique identifier
+- [**name**](#eqty_sdk_rustcontextname) (`str`) – Human-readable name
+- [**parent**](#eqty_sdk_rustcontextparent) (`Optional[UUID]`) – Optional parent ID for hierarchical organization
+
+## `eqty_sdk._rust.Context.id`
+
+```python
+id: uuid.UUID
+```
+
+Unique identifier
+
+## `eqty_sdk._rust.Context.name`
+
+```python
+name: str
+```
+
+Human-readable name
+
+## `eqty_sdk._rust.Context.parent`
+
+```python
+parent: Optional[uuid.UUID]
+```
+
+Optional parent ID for hierarchical organization
+
+## `eqty_sdk._rust.Context.new`
+
+```python
+new(name: str) -> Context
+```
+
+Creates a new root context with the given name. Use this to start a new local lineage graph that does not have a parent context. If the global config is initialized, the context is persisted to sqlite immediately and can be used as the default context for subsequent asset and computation registration.
+
+## `eqty_sdk._rust.Context.with_parent`
+
+```python
+with_parent(parent: Context) -> ContextFactory
+```
+
+Returns a factory that creates contexts with the provided parent.
+
+## `eqty_sdk._rust.Context.from_uuid`
+
+```python
+from_uuid(project_id: uuid.UUID) -> Context
+```
+
+Creates a new context with the given uuid.
+
+## `eqty_sdk._rust.Context.register`
+
+```python
+register(service: Service, *, delete_blobs: Optional[bool] = None, delete_statements: Optional[bool] = None) -> None
+```
+
+Registers this context, its ancestors, statements, and blobs with a service. Set `delete_blobs` to remove the locally stored blobs uploaded for this registration, `delete_statements` to remove this context's local statement records, or both to remove both after a successful registration. Cleanup is only attempted after all registration requests succeed. `delete_blobs` does not check whether another local context also references a blob.
+
+## `eqty_sdk._rust.Context.delete_tree`
+
+```python
+delete_tree() -> None
+```
+
+Deletes this context, all descendant contexts, and their local statements. This only removes local context and statement records; it does not delete blobs from the local blob store. Use this when the context hierarchy is no longer needed locally.
+
+## `eqty_sdk._rust.Context.delete`
+
+```python
+delete() -> None
+```
+
+Deletes this context and its local statements. Raises an error if this context has child contexts. Use `delete_tree()` to delete a context together with its descendants. This does not delete blobs from the local blob store.
+
+## `eqty_sdk._rust.Context.export`
+
+```python
+export(path: PathLike[str]) -> None
+```
+
+Exports this context's statements and blobs to a manifest JSON file.
+
+## `eqty_sdk._rust.Context.import_manifest`
+
+```python
+import_manifest(path: PathLike[str]) -> None
+```
+
+Imports the statements and blobs from a manifest file to this context.
+{/* end generated */}
